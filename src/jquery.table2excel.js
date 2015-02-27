@@ -3,7 +3,8 @@
 		var pluginName = "table2excel",
 				defaults = {
 				exclude: ".noExl",
-                name: "Table2Excel"
+                name: "Table2Excel",
+                fname: "table2excel.xls"
 		};
 
 		// The actual plugin constructor
@@ -24,17 +25,17 @@
 				var e = this;
 				e.template = "<html xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\" xmlns=\"http://www.w3.org/TR/REC-html40\"><head><!--[if gte mso 9]><xml>";
 				e.template += "<x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions>";
-				e.template += "<x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>";
+				e.template += "<x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border=1>{table}</table></body></html>";
 				e.tableRows = "";
 
 				// get contents of table except for exclude
 				$(e.element).find("tr").not(this.settings.exclude).each(function (i,o) {
 					e.tableRows += "<tr>" + $(o).html() + "</tr>";
 				});
-				this.tableToExcel(this.tableRows, this.settings.name);
+				this.tableToExcel(this.tableRows, this.settings.name, this.settings.fname);
 			},
-			tableToExcel: function (table, name) {
-				var e = this;
+			tableToExcel: function (table, name, fname) {
+				var e = this, a = $("<a></a>");
 				e.uri = "data:application/vnd.ms-excel;base64,";
 				e.base64 = function (s) {
 					return window.btoa(unescape(encodeURIComponent(s)));
@@ -48,7 +49,8 @@
 					worksheet: name || "Worksheet",
 					table: table
 				};
-				window.location.href = e.uri + e.base64(e.format(e.template, e.ctx));
+				a.attr("href", e.uri + e.base64(e.format(e.template, e.ctx))).attr("download", fname).appendTo("body").get(0).click();
+				a.remove();
 			}
 		};
 
